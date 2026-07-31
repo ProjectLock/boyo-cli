@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boyo - Cloud Infrastructure Butler</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --code-bg: #020617;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 2rem 1.5rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .github-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .github-link:hover {
+      color: var(--accent);
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+      flex: 1;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      padding: 0.35rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .tagline {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .terminal {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      text-align: left;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.95rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      margin: 0 auto 3rem;
+      max-width: 600px;
+    }
+
+    .terminal-header {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .line {
+      margin-bottom: 0.5rem;
+    }
+
+    .prompt {
+      color: var(--accent);
+      user-select: none;
+    }
+
+    .output {
+      color: var(--text-muted);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="#" class="logo">🏴󠁧󠁢󠁷󠁬󠁳󠁿 boyo</a>
+    <a href="https://github.com/ProjectLock/boyo-cli" class="github-link" target="_blank">View on GitHub →</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="badge">Go 1.26+ CLI Tool</span>
+      <h1>Your Cloud Infrastructure Butler</h1>
+      <p class="tagline">
+        Boyo is a lightweight Go CLI for prototyping best-practice cloud infrastructure in seconds using simple pre-baked templates.
+      </p>
+
+      <div class="terminal">
+        <div class="terminal-header">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+        </div>
+        <div class="line"><span class="prompt">$</span> boyo list</div>
+        <div class="line output">📋 Available Templates:</div>
+        <div class="line output">  • static-site : S3 Bucket + CloudFront OAC</div>
+        <div class="line output">  • webserver   : EC2 instance in public VPC</div>
+        <div class="line" style="margin-top: 1rem;"><span class="prompt">$</span> boyo create -t static-site -r us-east-1</div>
+        <div class="line output">🏴󠁧󠁢󠁷󠁬󠁳󠁿 Boyo is on the case! Provisioning S3 & CloudFront...</div>
+        <div class="line output">✅ Infrastructure ready!</div>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="card">
+        <h3>⚡ Single Binary</h3>
+        <p>Built with Go. Zero external runtime dependencies or heavy configuration files required.</p>
+      </div>
+      <div class="card">
+        <h3>☁️ Best Practice Templates</h3>
+        <p>Pre-configured AWS SDK architecture patterns built right into the tool.</p>
+      </div>
+      <div class="card">
+        <h3>🎯 Simple Command API</h3>
+        <p>Intuitive Cobra interface designed for fast local experimentation and testing.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Maintained under the ProjectLock organization.</p>
+  </footer>
+
+</body>
+</html>
