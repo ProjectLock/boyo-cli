@@ -13,7 +13,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Build the Binary
 
@@ -25,3 +25,16 @@ cd boyo-cli
 
 # Compile the binary as 'boyo'
 go build -o boyo
+```
+
+## Getting started
+### 1. Perform a deployment
+```bash
+boyo create -t webserver -r eu-west-1
+```
+### 2. List available template
+```bash
+boyo list
+```
+
+**Note:** *Currently resources must be delete by hand.*
