@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -14,7 +15,7 @@ import (
 
 const (
 	Name        = "webserver"
-	Description = "Single EC2 instance (t3.micro) with Nginx web server and Security Group, A VPC will be created too if needed."
+	Description = "Single EC2 instance (t3.micro) with Nginx web server, Security Group & VPC. Highly recommend changing security group inbound to your IP address for access."
 
 	al2023Param = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 	sgName      = "boyo-webserver-sg"
@@ -93,6 +94,7 @@ func getOrCreateSecurityGroup(ctx context.Context, client *ec2.Client, vpcID str
 	_, err = client.AuthorizeSecurityGroupIngress(ctx, &ec2.AuthorizeSecurityGroupIngressInput{
 		GroupId: aws.String(sgID),
 		IpPermissions: []types.IpPermission{
+			// Port 80 (HTTP)
 			{
 				IpProtocol: aws.String("tcp"),
 				FromPort:   aws.Int32(80),
@@ -104,13 +106,25 @@ func getOrCreateSecurityGroup(ctx context.Context, client *ec2.Client, vpcID str
 					},
 				},
 			},
+			// Port 22 (SSH / EC2 Instance Connect)
+			{
+				IpProtocol: aws.String("tcp"),
+				FromPort:   aws.Int32(22),
+				ToPort:     aws.Int32(22),
+				IpRanges: []types.IpRange{
+					{
+						CidrIp:      aws.String("0.0.0.0/0"),
+						Description: aws.String("Allow inbound SSH from anywhere"),
+					},
+				},
+			},
 		},
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to authorize HTTP ingress: %w", err)
+		return "", fmt.Errorf("failed to authorize ingress rules: %w", err)
 	}
 
-	fmt.Printf("Authorized inbound port 80 for Security Group (%s)\n", sgID)
+	fmt.Printf("Authorized inbound port 80 & 22 for Security Group (%s)\n", sgID)
 	return sgID, nil
 }
 
@@ -184,10 +198,36 @@ echo "<h1>Helo, Mae Boyo yn Barod!</h1>" > /usr/share/nginx/html/index.html
 
 	if len(result.Instances) > 0 {
 		instanceID := aws.ToString(result.Instances[0].InstanceId)
+
+		fmt.Println("Waiting for instance to reach 'running' state and get assigned a Public IP...")
+
+		// 1. Wait until the instance is running (times out after 5 minutes)
+		waiter := ec2.NewInstanceRunningWaiter(ec2Client)
+		err = waiter.Wait(ctx, &ec2.DescribeInstancesInput{
+			InstanceIds: []string{instanceID},
+		}, 5*time.Minute)
+		if err != nil {
+			return fmt.Errorf("failed waiting for instance to run: %w", err)
+		}
+
+		// 2. Fetch updated details (including Public IP)
+		descResult, err := ec2Client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
+			InstanceIds: []string{instanceID},
+		})
+		if err != nil || len(descResult.Reservations) == 0 || len(descResult.Reservations[0].Instances) == 0 {
+			return fmt.Errorf("failed to fetch running instance details: %w", err)
+		}
+
+		runningInstance := descResult.Reservations[0].Instances[0]
+		publicIP := aws.ToString(runningInstance.PublicIpAddress)
+
 		fmt.Printf("EC2 Webserver launched successfully!\n")
-		fmt.Printf("  • Instance ID: %s\n", instanceID)
-		fmt.Printf("  • VPC ID: %s\n", vpcID)
-		fmt.Printf("  • Security Group: %s\n", sgID)
+		fmt.Printf("Instance ID: %s\n", instanceID)
+		fmt.Printf("VPC ID: %s\n", vpcID)
+		fmt.Printf("Security Group: %s\n", sgID)
+		fmt.Printf("Web server will be available at: http://%s\n", publicIP)
+	} else {
+		return fmt.Errorf("no instances were created ")
 	}
 
 	return nil
