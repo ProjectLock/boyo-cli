@@ -25,7 +25,7 @@ jobs:
       run: go test -v ./...
 
     - name: Build local test binary
-      run: go build -v -o boyo ./...
+      run: go build -v -o boyo .
 
   release:
     needs: build-and-test
