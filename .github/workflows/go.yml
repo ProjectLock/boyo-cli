@@ -59,10 +59,19 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     # 1. Build the binary FIRST
-    - name: Build Versioned Binary
+    - name: Build Cross-Platform Binaries
       if: steps.semver.outputs.version != ''
       run: |
-        go build -v -ldflags="-X main.version=v${{ steps.semver.outputs.version }}" -o boyo .
+        LDFLAGS="-X main.version=v${{ steps.semver.outputs.version }}"
+
+        # Linux (64-bit)
+        GOOS=linux GOARCH=amd64 go build -v -ldflags="$LDFLAGS" -o boyo-linux-amd64 .
+
+        # Windows (64-bit)
+        GOOS=windows GOARCH=amd64 go build -v -ldflags="$LDFLAGS" -o boyo-windows-amd64.exe .
+
+        # macOS (Apple Silicon / M1/M2/M3)
+        GOOS=darwin GOARCH=arm64 go build -v -ldflags="$LDFLAGS" -o boyo-darwin-arm64 .
 
     # 2. Let semantic-release attach the compiled binary to the GitHub Release
     - name: Run Semantic Release
