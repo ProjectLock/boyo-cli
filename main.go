@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ProjectLock/boyo-cli/cloud/aws/templates/bastionhost"
 	"github.com/ProjectLock/boyo-cli/cloud/aws/templates/staticsite"
 	"github.com/ProjectLock/boyo-cli/cloud/aws/templates/webserver"
 
@@ -26,6 +27,11 @@ var registry = map[string]Template{
 		Name:        webserver.Name,
 		Description: webserver.Description,
 		DeployFunc:  webserver.Deploy,
+	},
+	bastionhost.Name: {
+		Name:        bastionhost.Name,
+		Description: bastionhost.Description,
+		DeployFunc:  bastionhost.Deploy,
 	},
 }
 
@@ -55,12 +61,12 @@ func createInfra(templateName string, region string) {
 }
 
 func main() {
-	fmt.Println("Helo! Mae Boyo yn barod")
+	fmt.Println("Helo, Mae Boyo yn barod!")
 
 	var rootCMD = &cobra.Command{
 		Use:   "boyo",
 		Short: "Boyo is a CLI tool for cloud deployment templates.",
-		Long:  `Boyo is a CLI tool for prototyping best-practice cloud infrastructure.`,
+		Long:  `Boyo is a CLI tool for prototyping cloud infrastructure.`,
 	}
 
 	var createCMD = &cobra.Command{
