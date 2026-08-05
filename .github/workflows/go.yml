@@ -1,0 +1,71 @@
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: write # Required to create tags and releases
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.20'
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Build local test binary
+      run: go build -v -o boyo ./...
+
+  release:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Full history required for commit analysis
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.20'
+
+    - name: Set up Node.js (for Semantic Release)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Semantic Release
+      run: npm install -g semantic-release @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/github
+
+    - name: Calculate Next Version
+      id: semver
+      run: |
+        # Dry run semantic-release to determine the upcoming version string
+        NEXT_VERSION=$(npx semantic-release --dry-run | grep -oP 'Published release \K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+        echo "version=${NEXT_VERSION}" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Versioned Binary
+      if: steps.semver.outputs.version != ''
+      run: |
+        go build -v -ldflags="-X main.version=v${{ steps.semver.outputs.version }}" -o boyo ./...
+
+    - name: Run Semantic Release
+      if: steps.semver.outputs.version != ''
+      run: npx semantic-release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
